@@ -1,5 +1,13 @@
 #include <iostream>
 #include <SDL2/SDL.h>
+#include <cmath>
+using namespace std;
+
+double get_magnitude(double x, double y) {
+
+  return sqrt(x * x + y * y);
+
+}
 
 int main() {
 
@@ -8,6 +16,7 @@ int main() {
   int window_height = 1080;
   double time = 0.0;
   int resolution = 50;
+  double line_length = 20;
 
   // Initialize framework
   SDL_Window* window = nullptr;
@@ -34,7 +43,15 @@ int main() {
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); 
     for(int i=0;i<resolution;i++) {
       for(int j=0;j<resolution;j++) {
-	SDL_RenderDrawLine(renderer, i * window_width / resolution, j * window_height / resolution, 100, 100);
+
+	double x1 = i * window_width / resolution;
+	double y1 = j * window_height / resolution;
+	double magnitude = get_magnitude(x1, y1);
+
+	double x2 = x1 + line_length * x1 / magnitude;
+	double y2 = y1 + line_length * y1 / magnitude;
+
+	SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
       }
     }
 
