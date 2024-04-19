@@ -9,6 +9,12 @@ double get_magnitude(double x, double y) {
 
 }
 
+string get_key_name(SDL_Event *event) {
+
+  return SDL_GetKeyName(event->key.keysym.sym);
+
+}
+
 int main() {
 
   // Initialize variables
@@ -17,6 +23,9 @@ int main() {
   double time = 0.0;
   int resolution = 50;
   double line_length = 20;
+  double offset_x = 0;
+  double offset_y = 0;
+  double camera_speed = 50;
 
   // Initialize framework
   SDL_Window* window = nullptr;
@@ -28,7 +37,25 @@ int main() {
   bool quit = false;
   SDL_Event event;
   while(!quit) {
+    // Event loop
     while(SDL_PollEvent(&event)) {
+      switch(event.type) {
+        case SDL_QUIT:
+	  quit = true;
+	  break;
+
+        case SDL_KEYDOWN:
+
+	  string key = get_key_name(&event);
+	  
+	  if(key == "J") offset_y += camera_speed;
+	  if(key == "K") offset_y -= camera_speed;
+	  if(key == "H") offset_x -= camera_speed;
+	  if(key == "L") offset_x += camera_speed;
+	    
+	  break;
+	
+      }
       if (event.type == SDL_QUIT) {
 	quit = true;
       }
@@ -40,18 +67,26 @@ int main() {
     SDL_RenderFillRect(renderer, &bg);
 
     // Draw lines
+    double scaling_factor_x = window_width / resolution;
+    double scaling_factor_y = window_height / resolution;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); 
-    for(int i=0;i<resolution;i++) {
-      for(int j=0;j<resolution;j++) {
+    for(int x=-0;x<resolution;x++) {
+      for(int y=0;y<resolution;y++) {
 
-	double x1 = i * window_width / resolution;
-	double y1 = j * window_height / resolution;
-	double magnitude = get_magnitude(x1, y1);
+	double x_prime = x + offset_x;
+	double y_prime = y + offset_y;
 
-	double x2 = x1 + line_length * x1 / magnitude;
-	double y2 = y1 + line_length * y1 / magnitude;
+	double dx = x_prime + y_prime;
+	double dy = x_prime + y_prime;
 
-	SDL_RenderDrawLine(renderer, x1, y1, x2, y2);
+	double magnitude = get_magnitude(dx, dy);
+	dx *= line_length / magnitude;
+	dy *= line_length / magnitude;
+
+	double screen_x = x * scaling_factor_x;
+	double screen_y = y * scaling_factor_y;
+
+	SDL_RenderDrawLine(renderer, screen_x, screen_y, screen_x + dx, screen_y + dy);
       }
     }
 
@@ -67,7 +102,7 @@ int main() {
   SDL_DestroyWindow(window);
   SDL_Quit();
 
-  std::cout << "Ran successfully!" << std::endl;
+  std::cout << "Built and executed successfully!" << std::endl;
   return 0;
 
 }
