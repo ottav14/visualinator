@@ -1,3 +1,0 @@
-#!/bin/bash
-
-g++ -lSDL2 -lm main.cpp -o run && ./run

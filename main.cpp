@@ -2,6 +2,11 @@
 #include <SDL2/SDL.h>
 #include <cmath>
 #include <vector>
+#include <QApplication>
+#include <QWidget>
+#include <QPushButton>
+#include <QDebug>
+
 using namespace std;
 
 vector<double> vector_add( vector<double> a, vector<double> b ) {
@@ -12,7 +17,6 @@ vector<double> vector_add( vector<double> a, vector<double> b ) {
     cerr << "ERROR: Vectors must be the same size when adding." << endl;
     return output;
   }
-
 
   return output;
 
@@ -31,17 +35,19 @@ string get_key_name(SDL_Event *event) {
 }
 
 
-int main() {
+int main(int argc, char *argv[]) {
+
+  QApplication app(argc, argv);
 
   // Initialize variables
   double window_width = 1920;
   double window_height = 1080;
 
-  double resolution_x = 100;
+  double resolution_x = 100.0;
   double resolution_y = resolution_x * window_height / window_width;
-  double line_length = 15;
+  double line_length = 15.0;
 
-  vector<double> offset = {0, 0};
+  vector<double> offset = {0.0, 0.0};
   double camera_speed = 1.0;
   double zoom_speed = 1.0;
   double time = 0.0;
@@ -108,23 +114,24 @@ int main() {
     SDL_RenderFillRect(renderer, &bg);
 
     // Draw lines
-    double scaling_factor_x = window_width / resolution_x;
-    double scaling_factor_y = window_height / resolution_y;
+    const double spacing = 100;
+    const double scaling_factor_x = (window_width + spacing) / resolution_x;
+    const double scaling_factor_y = (window_height + spacing) / resolution_y;
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255); 
     for(int x=1;x<resolution_x;x++) {
       for(int y=1;y<resolution_y;y++) {
 
-	double x_prime = x + offset[0] - resolution_x / 2; 
-	double y_prime = y + offset[1] - resolution_y / 2; 
+	double x_prime = zoom * (x + offset[0] - resolution_x / 2); 
+	double y_prime = zoom * (y + offset[1] - resolution_y / 2); 
 
 	// ODEs
-	double dx = 10*x_prime + y_prime;
+	double dx = x_prime + y_prime;
 	double dy = x_prime - y_prime;
 
 	double magnitude = get_magnitude(dx, dy);
 	if(magnitude > 0) {
-	  dx *= line_length / log(magnitude);
-	  dy *= line_length / log(magnitude);
+	  dx *= line_length / magnitude;
+	  dy *= line_length / magnitude;
 	}
 
 	double screen_x = x * scaling_factor_x;
@@ -146,7 +153,6 @@ int main() {
   SDL_DestroyWindow(window);
   SDL_Quit();
 
-  std::cout << "Built and executed successfully!" << std::endl;
   return 0;
 
 }
